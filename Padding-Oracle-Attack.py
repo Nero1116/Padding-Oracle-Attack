@@ -153,7 +153,6 @@ if __name__== "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("plaintext", help="type in the plaintext you would like to encrypt then attack")
     args = parser.parse_args()
-    print(args.plaintext)
     key = "140b41b22a29beb4061bda66b6747e14"
     plaintext = "This attack completely breaks any block cipher using CBC mode, given a padding oracle." \
                 " Implementation should be switched to more secure modes, such as CTR."
@@ -174,6 +173,6 @@ if __name__== "__main__":
     for i in range(0,len(cipherBlocks)-1):
         newBlock = decipherBlock(cipherBlocks[i+1],cipherBlocks[i])
         message = message + newBlock
-        print(message+"\n")
+        print(message)
     # output of message:
     print (message)
