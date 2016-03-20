@@ -10,6 +10,7 @@ from Crypto import Random
 # For base conversions:
 import base64
 import codecs
+import argparse
 
 # Block Size (In bytes):
 BS = 16
@@ -149,12 +150,16 @@ if __name__== "__main__":
     """
     
     # beginning of test code:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("plaintext", help="type in the plaintext you would like to encrypt then attack")
+    args = parser.parse_args()
+    print(args.plaintext)
     key = "140b41b22a29beb4061bda66b6747e14"
     plaintext = "This attack completely breaks any block cipher using CBC mode, given a padding oracle." \
                 " Implementation should be switched to more secure modes, such as CTR."
     key=key[:32]
     cryptmaster = AESCipher(key)
-    ciphertext = cryptmaster.encrypt(plaintext)
+    ciphertext = cryptmaster.encrypt(args.plaintext)
     # end of test block.
 
     # -----------------------------------------------------------------------------------#
