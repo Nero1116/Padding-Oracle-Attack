@@ -138,7 +138,7 @@ def decipherBlock(cipherBlock , prevCipherBlock, entireCiphertext):
         messageBytes.insert(0,byteD)
         message = chr(byteD)+message
         entireCiphertext = entireCiphertext[:-1] + chr(byteD)
-        print("deciphered byte " + i + " : " + entireCiphertext)
+        print("deciphered byte " + str(i) + " : " + entireCiphertext)
     return message,entireCiphertext
 
 """
