@@ -144,6 +144,7 @@ def decipherBlock(cipherBlock , prevCipherBlock, entireCiphertext):
         else:
             entireCiphertext = entireCiphertext[:-i-1] + chr(byteD) + entireCiphertext[-i+1:]
         print("deciphered byte " + str(i) + " : " + entireCiphertext)
+        print("\n\n")
     return message
 
 """
