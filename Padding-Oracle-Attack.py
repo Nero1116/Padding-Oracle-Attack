@@ -129,7 +129,7 @@ Inputs:
 Output:
     plaintext string of this block:
 """
-def decipherBlock(cipherBlock , prevCipherBlock, entireCiphertext):
+def decipherBlock(cipherBlock , prevCipherBlock, entireCiphertext,blockIndex):
     messageBytes = []
     message = ""
     #run on all bytes in block,from start to end, deciphering:
@@ -138,11 +138,11 @@ def decipherBlock(cipherBlock , prevCipherBlock, entireCiphertext):
         messageBytes.insert(0,byteD)
         message = chr(byteD)+message
         if i == 0:
-            entireCiphertext = entireCiphertext[:-1] + chr(byteD)
+            entireCiphertext = entireCiphertext[:-1*blockIndex] + chr(byteD)
         if i == BS-1:
-            chr(byteD) + entireCiphertext[1:]
+            chr(byteD) + entireCiphertext[1*blockIndex:]
         else:
-            entireCiphertext = entireCiphertext[:-i-1] + chr(byteD) + entireCiphertext[-i+1:]
+            entireCiphertext = entireCiphertext[:(-i*blockIndex)-1] + chr(byteD) + entireCiphertext[(-i*blockIndex)+1:]
         print("deciphered byte " + str(i) + " : " + entireCiphertext)
         print("\n\n")
     return message
@@ -176,7 +176,7 @@ if __name__== "__main__":
     
     # go block by block, deciphering and appending to message:
     for i in range(0,len(cipherBlocks)-1):
-    	newBlock = decipherBlock(cipherBlocks[i+1],cipherBlocks[i],ciphertext)
+    	newBlock = decipherBlock(cipherBlocks[i+1],cipherBlocks[i],ciphertext,i)
         #print(ciphertext)
     	message = message + newBlock
     # output of message:
