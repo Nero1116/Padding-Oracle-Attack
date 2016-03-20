@@ -167,9 +167,8 @@ if __name__== "__main__":
     
     # go block by block, deciphering and appending to message:
     for i in range(0,len(cipherBlocks)-1):
-    	newBlock = decipherBlock(cipherBlocks[i+1],cipherBlocks[i])
-        #print(ciphertext)
-    	message = message + newBlock
+        newBlock = decipherBlock(cipherBlocks[i+1],cipherBlocks[i])
+        message = message + newBlock
         print(message+"\n")
     # output of message:
     print (message)
