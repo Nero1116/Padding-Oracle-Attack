@@ -1,4 +1,10 @@
 """
+------------------------------------------------------------
+Authors:
+Jonathan Shvarts
+Shalev Keren
+------------------------------------------------------------
+
 Padding Oracle attack code.
 AES Implementation included for testing.
 For use, replace 'cryptmaster.decrypt()' call with your own padding oracle.
@@ -30,7 +36,7 @@ def unpad(s):
     if(pad<=0 or pad > len(s)):
         return False
     for i in s[len(s)-pad:]:
-        if i!=pad:
+        if i != pad:
             return False
     return s[:len(s)-pad]
 
@@ -143,7 +149,7 @@ def decipherBlock(cipherBlock , prevCipherBlock):
 """
 Main Operation:
 """
-if __name__== "__main__":
+if __name__ == "__main__":
     """
          For actual use, delete following block,define 'ciphertext' to be your ciphertext,
          and replace all calls to 'cryptmaster.decipher()' in code to your padding oracle.
