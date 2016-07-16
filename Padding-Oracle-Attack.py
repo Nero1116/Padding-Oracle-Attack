@@ -17,6 +17,7 @@ from Crypto import Random
 import base64
 import codecs
 import argparse
+import struct
 
 # Block Size (In bytes):
 BS = 16
@@ -26,13 +27,13 @@ For testing code block.
 This is the Enc/Dec scheme we use as a padding oracle for testing:
 """
 # padding function for AES mode (PKCS5):
-pad = lambda s: s + (BS - len(s) % BS) * chr(BS - len(s) % BS)
+pad = lambda s: s + b"".join([bytes(chr(BS - len(s) % BS), 'utf8')]*(BS - len(s) % BS))  # (BS - len(s) % BS) * bytes(BS - len(s) % BS)
 
 # unpadding function:
 
 
 def unpad(s):
-    pad = s[len(s)-1]
+    pad = int(s[len(s)-1])
     if(pad<=0 or pad > len(s)):
         return False
     for i in s[len(s)-pad:]:
@@ -55,7 +56,7 @@ class AESCipher:
         Returns hex encoded encrypted value!
         """
         raw = pad(raw)
-        iv = Random.new().read(AES.block_size);
+        iv = Random.new().read(AES.block_size)
         cipher = AES.new( self.key, AES.MODE_CBC, iv )
         return codecs.encode(( iv + cipher.encrypt( raw ) ), 'hex_codec')
 
@@ -113,13 +114,12 @@ def decipherByte(byteIndex,cipherBlock,prevCipherBlock,decipheredBytes=[],blockS
         result = cryptmaster.decrypt(cipherTry)
 
         # when padding oracle returns true, we know that he believes message to have correct padding:
-        if(result != False):
+        if result != False:
 
             # set deciphered byte to correct value:
             if( blockToManipulate[byteIndex*2:(byteIndex*2)+2] != byteToManipulate ):
 
                 # if not only the original padding worked:
-                didTwoBytesWork = True
                 decipheredByte = i^(blockSize-byteIndex)^int(byteToManipulate,16)
                 return decipheredByte
             else:
@@ -156,15 +156,33 @@ if __name__ == "__main__":
     """
     
     # beginning of test code:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("plaintext", help="type in the plaintext you would like to encrypt then attack")
-    args = parser.parse_args()
+    #parser = argparse.ArgumentParser()
+    #parser.add_argument("plaintext", help="type in the plaintext you would like to encrypt then attack")
+    #args = parser.parse_args()
     key = "140b41b22a29beb4061bda66b6747e14"
     plaintext = "This attack completely breaks any block cipher using CBC mode, given a padding oracle." \
                 " Implementation should be switched to more secure modes, such as CTR."
     key=key[:32]
     cryptmaster = AESCipher(key)
-    ciphertext = cryptmaster.encrypt(args.plaintext)
+    import binascii
+    s = "helloYosadsad|asdsadsadsad"
+    s = bytes(s, "utf8")
+    print(str(s))
+    print(type(s))
+    hex_ip = binascii.unhexlify('0f000001' + '00' * 12)
+    print(type(hex_ip))
+    print(hex_ip)
+    #hex_ip = codecs.decode(hex_ip, "ascii")
+    hex_ip += s
+    #ciphertext = cryptmaster.encrypt(args.plaintext)
+    ciphertext = cryptmaster.encrypt(hex_ip)
+    print(ciphertext)
+    ciphertext = binascii.unhexlify('ceba36ec6e90bfb8ed44ca0a2a4e7720cd3004eabf5a9de67081d38995a09667b62314245d861899a11d9b09901edeb111923dbbc4a922dfbc9489c947590395')
+    print(ciphertext)
+    ciphertext = bytearray(ciphertext)
+    print(ciphertext)
+    num, = struct.unpack('>H', ciphertext)
+    print(num)
     # end of test block.
 
     # -----------------------------------------------------------------------------------#
@@ -176,9 +194,10 @@ if __name__ == "__main__":
     message = ""
     
     # go block by block, deciphering and appending to message:
-    for i in range(0,len(cipherBlocks)-1):
+    for i in range(0, len(cipherBlocks)-1):
         newBlock = decipherBlock(cipherBlocks[i+1],cipherBlocks[i])
         message = message + newBlock
         print(message)
     # output of message:
     print (message)
+    print(str(bytes(message,"utf8")))
