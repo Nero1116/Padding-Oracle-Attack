@@ -177,12 +177,20 @@ if __name__ == "__main__":
     #ciphertext = cryptmaster.encrypt(args.plaintext)
     ciphertext = cryptmaster.encrypt(hex_ip)
     print(ciphertext)
-    ciphertext = binascii.unhexlify('ceba36ec6e90bfb8ed44ca0a2a4e7720cd3004eabf5a9de67081d38995a09667b62314245d861899a11d9b09901edeb111923dbbc4a922dfbc9489c947590395')
+    p = cryptmaster.decrypt(ciphertext)
+    print(p)
+    print('--------------------------------------------------------------------------------------')
+    ciphertext = "b'd84874dbc3c92ac242243f8d01d5cb54c1b21abb5daa4b98b318ec2c7b857e26ebafbf1cfe13a764109c0de6c9ebb7a8'"
+    ciphertext = eval(ciphertext)
+    #ciphertext = codecs.decode(ciphertext, 'hex_codec')
+    print(ciphertext)
+    """ciphertext = binascii.unhexlify('d84874dbc3c92ac242243f8d01d5cb54c1b21abb5daa4b98b318ec2c7b857e26ebafbf1cfe13a764109c0de6c9ebb7a8')
     print(ciphertext)
     ciphertext = bytearray(ciphertext)
     print(ciphertext)
-    num, = struct.unpack('>H', ciphertext)
-    print(num)
+    #num, = struct.unpack('>H', ciphertext)
+    #print(num)"""
+    print('------------------------------- ATTACK ------------------------------------------------------')
     # end of test block.
 
     # -----------------------------------------------------------------------------------#
@@ -195,7 +203,7 @@ if __name__ == "__main__":
     
     # go block by block, deciphering and appending to message:
     for i in range(0, len(cipherBlocks)-1):
-        newBlock = decipherBlock(cipherBlocks[i+1],cipherBlocks[i])
+        newBlock = decipherBlock(cipherBlocks[i+1], cipherBlocks[i])
         message = message + newBlock
         print(message)
     # output of message:
