@@ -18,6 +18,7 @@ import base64
 import codecs
 import argparse
 import struct
+import requests
 
 # Block Size (In bytes):
 BS = 16
@@ -29,12 +30,11 @@ This is the Enc/Dec scheme we use as a padding oracle for testing:
 # padding function for AES mode (PKCS5):
 pad = lambda s: s + b"".join([bytes(chr(BS - len(s) % BS), 'utf8')]*(BS - len(s) % BS))  # (BS - len(s) % BS) * bytes(BS - len(s) % BS)
 
+
 # unpadding function:
-
-
 def unpad(s):
     pad = int(s[len(s)-1])
-    if(pad<=0 or pad > len(s)):
+    if pad <= 0 or pad > len(s):
         return False
     for i in s[len(s)-pad:]:
         if i != pad:
@@ -45,31 +45,45 @@ def unpad(s):
 
 
 class AESCipher:
-    def __init__( self, key ):
+    def __init__(self, key):
         """
         Requires hex encoded param as a key
         """
         self.key = codecs.decode(key, 'hex_codec')
 
-    def encrypt( self, raw ):
+    def encrypt(self, raw):
         """
         Returns hex encoded encrypted value!
         """
         raw = pad(raw)
         iv = Random.new().read(AES.block_size)
-        cipher = AES.new( self.key, AES.MODE_CBC, iv )
-        return codecs.encode(( iv + cipher.encrypt( raw ) ), 'hex_codec')
+        cipher = AES.new(self.key, AES.MODE_CBC, iv)
+        return codecs.encode((iv + cipher.encrypt(raw)), 'hex_codec')
 
-    def decrypt( self, enc ):
+    def decrypt(self, enc):
         """
         Requires hex encoded param to decrypt
         """
         enc = codecs.decode(enc, 'hex_codec')
         iv = enc[:16]
-        enc= enc[16:]
-        cipher = AES.new(self.key, AES.MODE_CBC, iv )
-        plaintext = cipher.decrypt( enc)
+        enc = enc[16:]
+        cipher = AES.new(self.key, AES.MODE_CBC, iv)
+        plaintext = cipher.decrypt(enc)
         return unpad(plaintext)
+
+
+def padding_oracle(cipherTry):
+    print(str(cipherTry))
+    url = "http://127.0.0.1:8080/" #"http://52.4.146.190:8080/"
+    cookies = {
+        'topsecret': str(cipherTry),
+        }
+    response = requests.get(url, cookies=cookies).text
+    if response == 'incorrect padding':
+        print("True : " + response)
+        return False
+    return True
+
 
 """
 Function deciphers a single given byte in the block:
@@ -82,25 +96,22 @@ Inputs:
 Output:
     the deciphered value of the byte (as int)
 """
-
-
 def decipherByte(byteIndex,cipherBlock,prevCipherBlock,decipheredBytes=[],blockSize = 16):
-    
+
     # initialize run variables:
-    didTwoBytesWork = False
     tailBytes = bytearray()
     i = 1
     
     # append the correct padding to all bytes after the one we are deciphering:
     for b in decipheredBytes:
-        tailBytes = tailBytes + bytearray([b^int(prevCipherBlock[(byteIndex+i)*2:(byteIndex+i)*2+2],16)^(blockSize-byteIndex)]*1)
+        tailBytes = tailBytes + bytearray([b^int(prevCipherBlock[(byteIndex+i)*2:(byteIndex+i)*2+2], 16) ^ (blockSize - byteIndex)]*1)
         i = i+1
 
     # the ciphertext byte we are manipulating:
     byteToManipulate = prevCipherBlock[byteIndex*2:((byteIndex*2)+2)]
 
     # run on all options for value:
-    for i in range(0,256):
+    for i in range(0, 256):
         
         # change value of manipulated cipher text:
         blockToManipulate = prevCipherBlock
@@ -111,19 +122,20 @@ def decipherByte(byteIndex,cipherBlock,prevCipherBlock,decipheredBytes=[],blockS
         
         # send to padding oracle:
         cipherTry = blockToManipulate + cipherBlock
-        result = cryptmaster.decrypt(cipherTry)
+        print(str(cipherTry))
+        result = padding_oracle(cipherTry)  # cryptmaster.decrypt(cipherTry)
 
         # when padding oracle returns true, we know that he believes message to have correct padding:
         if result != False:
 
             # set deciphered byte to correct value:
-            if( blockToManipulate[byteIndex*2:(byteIndex*2)+2] != byteToManipulate ):
+            if blockToManipulate[byteIndex*2:(byteIndex*2)+2] != byteToManipulate:
 
                 # if not only the original padding worked:
-                decipheredByte = i^(blockSize-byteIndex)^int(byteToManipulate,16)
+                decipheredByte = i ^ (blockSize-byteIndex) ^ int(byteToManipulate, 16)
                 return decipheredByte
             else:
-                decipheredByte = i^(blockSize-byteIndex)^int(byteToManipulate,16)
+                decipheredByte = i ^ (blockSize-byteIndex) ^ int(byteToManipulate, 16)
 
     # return result:
     return decipheredByte
@@ -154,7 +166,7 @@ if __name__ == "__main__":
          For actual use, delete following block,define 'ciphertext' to be your ciphertext,
          and replace all calls to 'cryptmaster.decipher()' in code to your padding oracle.
     """
-    
+    padding_oracle("b'd84874dbc3c92ac242243f8d01d5cb54c1b21abb5daa4b98b318ec2c7b857e26ebafbf1cfe13a764109c0de6c9ebb7a8'")
     # beginning of test code:
     #parser = argparse.ArgumentParser()
     #parser.add_argument("plaintext", help="type in the plaintext you would like to encrypt then attack")
@@ -201,5 +213,5 @@ if __name__ == "__main__":
         message = message + newBlock
         print(message)
     # output of message:
-    print (message)
-    print(str(bytes(message,"utf8")))
+    print(message)
+    print(str(bytes(message, "utf8")))
