@@ -184,12 +184,6 @@ if __name__ == "__main__":
     ciphertext = eval(ciphertext)
     #ciphertext = codecs.decode(ciphertext, 'hex_codec')
     print(ciphertext)
-    """ciphertext = binascii.unhexlify('d84874dbc3c92ac242243f8d01d5cb54c1b21abb5daa4b98b318ec2c7b857e26ebafbf1cfe13a764109c0de6c9ebb7a8')
-    print(ciphertext)
-    ciphertext = bytearray(ciphertext)
-    print(ciphertext)
-    #num, = struct.unpack('>H', ciphertext)
-    #print(num)"""
     print('------------------------------- ATTACK ------------------------------------------------------')
     # end of test block.
 
